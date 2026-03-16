@@ -70,6 +70,56 @@ dist/
 
 ---
 
+# 🐳 Déploiement avec Docker
+
+Docker permet d'exécuter la version **production** de l'application dans un conteneur.
+
+Le conteneur utilise :
+
+- **Node.js** pour construire l'application
+- **Nginx** pour servir les fichiers statiques générés
+
+---
+
+# 🚀 Construire et lancer l'image Docker
+
+Construire l'image :
+
+```bash
+docker build -t react-vite-app .
+```
+
+Lancer le conteneur :
+
+```bash
+docker run -d -p 8080:80 --name react-vite-container react-vite-app
+```
+
+L'application sera accessible à l'adresse :
+
+```
+http://localhost:8080
+```
+
+---
+
+# 🌍 Déploiement sur un serveur
+
+Sur un serveur disposant de Docker :
+
+```bash
+docker build -t react-vite-app .
+docker run -d -p 80:80 --restart always --name react-vite-container react-vite-app
+```
+
+L'application sera alors accessible sur :
+
+```
+http://<adresse-du-serveur>
+```
+
+---
+
 # 📁 Structure du projet
 
 ```
@@ -104,3 +154,4 @@ project/
 * React
 * Vite
 * Node.js **v22 LTS**
+* Docker
