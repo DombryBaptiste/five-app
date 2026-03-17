@@ -54,6 +54,12 @@ Le **hot reload** est activé : toute modification dans le code recharge automat
 
 ---
 
+# .env
+
+Prendre l'exemple du .env.exemple et ajouter les variables de l'application firebase
+
+---
+
 # 🏗️ Build de production
 
 Pour générer la version optimisée de l'application :
