@@ -5,25 +5,27 @@ export type ToastOptions = {
     position: ToastPosition;
     autoClose?: number;
 }
-export const toastService = {
-    success: (message: string, options?: ToastOptions) => {
+class ToastService {
+    success(message: string, options?: ToastOptions) {
         toast.success(message, {
             position: options?.position ?? "top-right",
             autoClose: options?.autoClose ?? 4000,
         });
-    },
+    }
 
-    warning: (message: string, options?: ToastOptions) => {
+    warning(message: string, options?: ToastOptions) {
         toast.warning(message, {
             position: options?.position ?? "top-right",
             autoClose: options?.autoClose ?? 4000,
         });
-    },
+    }
 
-    error: (message: string, options?: ToastOptions) => {
+    error(message: string, options?: ToastOptions) {
         toast.error(message, {
             position: options?.position ?? "top-right",
             autoClose: options?.autoClose ?? 4000,
         });
-    },
+    }
 }
+
+export default new ToastService();
