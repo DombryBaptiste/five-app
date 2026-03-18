@@ -1,0 +1,104 @@
+.user-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* overlay style login */
+.user-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1), transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1), transparent 50%);
+  pointer-events: none;
+}
+
+/* carte principale */
+.user-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid #2d5016;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  z-index: 1;
+}
+
+/* header */
+.user-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d5016;
+  margin-bottom: 20px;
+}
+
+/* avatar */
+.user-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+  border: 3px solid #22c55e;
+}
+
+/* nom */
+.user-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d5016;
+}
+
+/* email */
+.user-email {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+/* bouton principal */
+.create-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 15px;
+  transition: 0.2s;
+}
+
+.create-btn:hover {
+  background: #16a34a;
+  transform: translateY(-2px);
+}
+
+/* bouton logout */
+.logout-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}

@@ -3,7 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import LoginPage from "../pages/LoginPage/LoginPage";
 import ProtectedRoute from "../components/protectedRoute";
 import CreateEventPage from "../pages/CreateEventPage";
-import UserProfilPage from "../pages/UserProfilPage";
+import UserProfilPage from "../pages/UserProfilPage/UserProfilPage";
 
 export const router = createBrowserRouter([
   {

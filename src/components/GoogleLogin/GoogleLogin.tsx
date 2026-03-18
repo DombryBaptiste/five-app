@@ -20,7 +20,6 @@ export default function GoogleLogin({ onLoginSuccess }: GoogleLoginProps) {
     setIsLoading(true);
     try {
       const user = await authService.signInWithGoogle();
-      toast.success(`✓ Bienvenue ${user.displayName || "!"}`);
       onLoginSuccess?.(user);
       console.log("Utilisateur connecté:", user)
     } catch (error) {
