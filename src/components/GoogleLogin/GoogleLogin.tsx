@@ -3,6 +3,7 @@ import authService from "../../services/authService";
 import type { User } from "firebase/auth";
 import { toast } from "react-toastify";
 import "./GoogleLogin.css";
+import { FaGoogle } from "react-icons/fa";
 
 interface GoogleLoginProps {
   onLoginSuccess?: (user: User) => void;
@@ -37,6 +38,7 @@ export default function GoogleLogin({ onLoginSuccess }: GoogleLoginProps) {
       className="google-login-btn"
     >
       {isLoading ? "Connexion en cours..." : "Se connecter avec Google"}
+      <FaGoogle />
     </button>
   );
 }

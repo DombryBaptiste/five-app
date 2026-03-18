@@ -1,0 +1,123 @@
+/* Login Page Styles - Football Theme */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.login-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  backdrop-filter: blur(10px);
+  border: 2px solid #2d5016;
+  position: relative;
+  z-index: 1;
+}
+
+.login-title {
+  color: #2d5016;
+  margin-bottom: 30px;
+  font-size: 32px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.login-subtitle {
+  color: #4a7c59;
+  margin-bottom: 40px;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.football-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.welcome-text {
+  color: #2d5016;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.login-description {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Football field pattern overlay */
+.login-page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 98px,
+    rgba(255, 255, 255, 0.1) 98px,
+    rgba(255, 255, 255, 0.1) 100px
+  );
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.google-login-button {
+    display: flex;
+    justify-content: center;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 30px 20px;
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  .login-title {
+    font-size: 28px;
+  }
+
+  .welcome-text {
+    font-size: 20px;
+  }
+
+  .football-icon {
+    font-size: 36px;
+  }
+}

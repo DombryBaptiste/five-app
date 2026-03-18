@@ -1,49 +1,17 @@
-import { useEffect, useState } from "react";
-import type { User } from "firebase/auth";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import authService from "./services/authService";
-import GoogleLogin from "./components/GoogleLogin/GoogleLogin";
-import UserProfile from "./components/UserProfile/UserProfile";
 import "./App.css";
-import { Tooltip } from "react-tooltip";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router/router";
+import useAuth from "./context/use-auth";
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { loading } = useAuth();
 
-  // Vérifier l'état d'authentification au chargement
-  useEffect(() => {
-    const unsubscribe = authService.onAuthChange((currentUser) => {
-      setUser(currentUser);
-      setIsLoading(false);
-    });
-
-    // Nettoyage
-    return () => unsubscribe();
-  }, []);
-
-  if (isLoading) {
-    return <div className="loading">Chargement...</div>;
+  if (loading) {
+    return <p>Chargement...</p>;
   }
 
-  return (
-    <>
-      <div className="app-container">
-        <h1>Five App - Gérez vos événements</h1>
-
-        {user ? (
-          <UserProfile user={user} onLogout={() => setUser(null)} />
-        ) : (
-          <GoogleLogin onLoginSuccess={setUser} />
-        )}
-      </div>
-      <ToastContainer />
-      <Tooltip
-        id="generic-tooltip"
-      />
-    </>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
