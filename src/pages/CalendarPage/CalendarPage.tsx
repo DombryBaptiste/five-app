@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import frLocale from "@fullcalendar/core/locales/fr";
 import Button from "@mui/material/Button"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
+import calendarService from "../../services/calendarService";
+import toastService from "../../services/toastService";
 
 
 export default function CalendarPage() {
@@ -22,6 +24,7 @@ export default function CalendarPage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
+    calendarService.getDispo()
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -30,7 +33,21 @@ export default function CalendarPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleSelect = (info: DateSelectArg) => {
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const data = await calendarService.getDispo();
+        setEvents(data);
+      } catch (error) {
+        console.log("Erreur", error)
+      }
+    };
+
+    loadEvents();
+  }, []);
+
+
+  const handleSelect = async (info: DateSelectArg) => {
     const newEvent: EventInput = {
       id: crypto.randomUUID(),
       title: "Disponible",
@@ -40,16 +57,21 @@ export default function CalendarPage() {
       borderColor: "#22c55e",
     };
 
-    setEvents((prev) => [...prev, newEvent]);
+    const returnId = await calendarService.addDispo(newEvent);
+
+    setEvents((prev) => [
+      ...prev, 
+      { ...newEvent, id: returnId }
+    ]);
     info.view.calendar.unselect();
+
+    toastService.success("La disponiblité a bien été ajoutée.")
   };
 
-  const handleEventClick = (clickInfo: EventClickArg) => {
+  const handleEventClick = async (clickInfo: EventClickArg) => {
     const eventId = clickInfo.event.id;
-
-    if (window.confirm("Supprimer cette disponibilité ?")) {
-      setEvents((prev) => prev.filter((event) => event.id !== eventId));
-    }
+    await calendarService.deleteDispo(eventId)
+    setEvents((prev) => prev.filter((event) => event.id !== eventId));
   };
 
   return (

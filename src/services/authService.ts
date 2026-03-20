@@ -62,14 +62,9 @@ class AuthService {
     return onAuthStateChanged(auth, callback);
   }
 
-  // isTokenExpired(): boolean {
-  //   const user = this.getCurrentUser();
-  //   if (!user) {
-  //     return true;
-  //   }
-
-  //   const token = user.getIdTokenResult();
-  // } 
+  getCurrentUserId(): string | undefined {
+    return auth.currentUser?.uid
+  }
 }
 
 export default new AuthService();
