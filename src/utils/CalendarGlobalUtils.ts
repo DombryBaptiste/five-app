@@ -111,3 +111,17 @@ export function formatBestSlot(best: AggregatedSlot): string {
 
   return `${best.availableCount}/${best.totalUsers} disponibles — ${startDate} de ${startTime} à ${endTime}`;
 }
+
+export function GetStartDateForFilter(): Date
+{
+  const now = new Date();
+
+  const startOfWeek = new Date(now);
+  const day = now.getDay(); // 0 = dimanche, 1 = lundi...
+
+  const diff = day === 0 ? -6 : 1 - day; // gestion dimanche
+  startOfWeek.setDate(now.getDate() + diff);
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  return startOfWeek;
+}

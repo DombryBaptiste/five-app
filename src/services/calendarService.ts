@@ -16,6 +16,7 @@ import {
   type AvailabilityEvent,
 } from "../type/AvailabilityEvent";
 import type { GlobalAvailabilityEvent } from "../type/GlobalAvailabilityEvent";
+import { GetStartDateForFilter } from "../utils/CalendarGlobalUtils";
 
 class CalendarService {
   private readonly AVAILABILITIES_TABLE = "availabilities";
@@ -42,6 +43,7 @@ class CalendarService {
 
   async getDispos(onlyCurrentUser: boolean = true): Promise<EventInput[]> {
     let q;
+    const startOfWeek = GetStartDateForFilter();
 
     if (onlyCurrentUser) {
       const userInfos = authService.getCurrentUserInfos();
@@ -49,9 +51,13 @@ class CalendarService {
       q = query(
         collection(db, this.AVAILABILITIES_TABLE),
         where("userId", "==", userInfos.userId),
+        where("start", ">=", startOfWeek)
       );
     } else {
-      q = query(collection(db, this.AVAILABILITIES_TABLE));
+      q = query(
+        collection(db, this.AVAILABILITIES_TABLE),
+        where("start", ">=", startOfWeek)
+      );
     }
 
     const querySnapshot = await getDocs(q);
