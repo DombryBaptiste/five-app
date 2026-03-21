@@ -73,11 +73,11 @@
   padding: 12px;
   border-radius: 10px;
   border: none;
-  background: #22c55e;
+  background: #22c55e !important;
   color: white;
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: 15px;
+  margin-bottom: 15px !important;
   transition: 0.2s;
 }
 

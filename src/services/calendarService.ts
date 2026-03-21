@@ -15,6 +15,7 @@ import {
   eventInputToAvailabilityEvent,
   type AvailabilityEvent,
 } from "../type/AvailabilityEvent";
+import type { GlobalAvailabilityEvent } from "../type/GlobalAvailabilityEvent";
 
 class CalendarService {
   private readonly AVAILABILITIES_TABLE = "availabilities";
@@ -62,6 +63,23 @@ class CalendarService {
       return availabilityEventToEventInput(data, dataId);
     });
   }
+
+  async getGlobalDispos(): Promise<GlobalAvailabilityEvent[]> {
+  const q = query(collection(db, this.AVAILABILITIES_TABLE));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map((doc) => {
+    const data = doc.data() as AvailabilityEvent;
+
+    return {
+      eventId: doc.id,
+      userId: data.userId,
+      userName: data.userName,
+      start: data.start.toDate(),
+      end: data.end.toDate(),
+    };
+  });
+}
 }
 
 export default new CalendarService();

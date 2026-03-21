@@ -104,6 +104,7 @@ export default function CalendarPage() {
             slotMaxTime={MAX_TIME}
             scrollTime="12:00:00"
             height="auto"
+            allDaySlot={false}
           />
         </div>
       </div>

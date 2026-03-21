@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import authService from "../../services/authService";
 import "./UserProfilPage.css";
 import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
 
 export default function UserProfilPage() {
   const { user, loading } = useAuth();
@@ -20,6 +21,10 @@ export default function UserProfilPage() {
 
   const handleCalendarClick = () => {
     navigate("/calendar");
+  }
+
+  const handleDispoClick = () => {
+    navigate("/calendar-global")
   }
 
   if (loading) return <p>Chargement...</p>;
@@ -45,8 +50,12 @@ export default function UserProfilPage() {
         <p className="user-email">{user.email}</p>
 
         <button className="create-btn" onClick={handleCalendarClick}>
-          Calendrier des dispos
+          Mes disponibilités
         </button>
+
+        <Button variant="contained" className="create-btn" onClick={handleDispoClick}>
+          Voir les dispo
+        </Button>
 
         <button onClick={handleLogout} className="logout-btn">
           <FaSignOutAlt /> Se déconnecter
