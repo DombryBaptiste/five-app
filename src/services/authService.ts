@@ -7,6 +7,7 @@ import {
 import type { User } from "firebase/auth";
 import { auth } from "../config/firebase";
 import storageService from "./storageService";
+import type { UserInfos } from "../type/UserInfos";
 
 /**
  * Service d'authentification Firebase avec Google
@@ -62,8 +63,12 @@ class AuthService {
     return onAuthStateChanged(auth, callback);
   }
 
-  getCurrentUserId(): string | undefined {
-    return auth.currentUser?.uid
+  getCurrentUserInfos(): UserInfos {
+    const userInfos: UserInfos = {
+      userId: auth.currentUser?.uid,
+      userName: auth.currentUser?.displayName
+    }
+    return userInfos
   }
 }
 

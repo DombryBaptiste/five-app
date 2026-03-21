@@ -24,7 +24,6 @@ export default function CalendarPage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
-    calendarService.getDispo()
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -36,7 +35,7 @@ export default function CalendarPage() {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const data = await calendarService.getDispo();
+        const data = await calendarService.getDispos(true);
         setEvents(data);
       } catch (error) {
         console.log("Erreur", error)

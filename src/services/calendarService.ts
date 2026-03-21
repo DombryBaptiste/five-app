@@ -10,14 +10,22 @@ import {
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import authService from "./authService";
-import { availabilityEventToEventInput, eventInputToAvailabilityEvent, type AvailabilityEvent } from "../type/AvailabilityEvent";
-
+import {
+  availabilityEventToEventInput,
+  eventInputToAvailabilityEvent,
+  type AvailabilityEvent,
+} from "../type/AvailabilityEvent";
 
 class CalendarService {
   private readonly AVAILABILITIES_TABLE = "availabilities";
 
   async addDispo(event: EventInput): Promise<string> {
-    const send = eventInputToAvailabilityEvent(event, authService.getCurrentUserId());
+    const userInfos = authService.getCurrentUserInfos();
+    const send = eventInputToAvailabilityEvent(
+      event,
+      userInfos.userId,
+      userInfos.userName,
+    );
 
     const docRef = await addDoc(
       collection(db, this.AVAILABILITIES_TABLE),
@@ -31,21 +39,29 @@ class CalendarService {
     await deleteDoc(doc(db, this.AVAILABILITIES_TABLE, eventId));
   }
 
-  async getDispoCurrentUser(): Promise<EventInput[]> {
-    const q = query(
-      collection(db, this.AVAILABILITIES_TABLE),
-      where("userId", "==", authService.getCurrentUserId()),
-    );
+  async getDispos(onlyCurrentUser: boolean = true): Promise<EventInput[]> {
+    let q;
+
+    if (onlyCurrentUser) {
+      const userInfos = authService.getCurrentUserInfos();
+
+      q = query(
+        collection(db, this.AVAILABILITIES_TABLE),
+        where("userId", "==", userInfos.userId),
+      );
+    } else {
+      q = query(collection(db, this.AVAILABILITIES_TABLE));
+    }
 
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.docs.map((doc) => {
       const dataId = doc.id;
       const data = doc.data() as AvailabilityEvent;
+
       return availabilityEventToEventInput(data, dataId);
     });
   }
-
 }
 
 export default new CalendarService();
