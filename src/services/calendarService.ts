@@ -43,20 +43,17 @@ class CalendarService {
 
   async getDispos(onlyCurrentUser: boolean = true): Promise<EventInput[]> {
     let q;
-    const startOfWeek = GetStartDateForFilter();
-
     if (onlyCurrentUser) {
       const userInfos = authService.getCurrentUserInfos();
 
       q = query(
         collection(db, this.AVAILABILITIES_TABLE),
         where("userId", "==", userInfos.userId),
-        where("start", ">=", startOfWeek)
       );
     } else {
       q = query(
         collection(db, this.AVAILABILITIES_TABLE),
-        where("start", ">=", startOfWeek)
+        
       );
     }
 
@@ -71,21 +68,27 @@ class CalendarService {
   }
 
   async getGlobalDispos(): Promise<GlobalAvailabilityEvent[]> {
-  const q = query(collection(db, this.AVAILABILITIES_TABLE));
-  const querySnapshot = await getDocs(q);
+    const startOfWeek = GetStartDateForFilter();
+    console.log(startOfWeek)
 
-  return querySnapshot.docs.map((doc) => {
-    const data = doc.data() as AvailabilityEvent;
+    const q = query(
+      collection(db, this.AVAILABILITIES_TABLE),
+      where("start", ">=", startOfWeek)
+    );
+    const querySnapshot = await getDocs(q);
 
-    return {
-      eventId: doc.id,
-      userId: data.userId,
-      userName: data.userName,
-      start: data.start.toDate(),
-      end: data.end.toDate(),
-    };
-  });
-}
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data() as AvailabilityEvent;
+
+      return {
+        eventId: doc.id,
+        userId: data.userId,
+        userName: data.userName,
+        start: data.start.toDate(),
+        end: data.end.toDate(),
+      };
+    });
+  }
 }
 
 export default new CalendarService();
