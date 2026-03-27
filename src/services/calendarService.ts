@@ -69,7 +69,6 @@ class CalendarService {
 
   async getGlobalDispos(): Promise<GlobalAvailabilityEvent[]> {
     const startOfWeek = GetStartDateForFilter();
-    console.log(startOfWeek)
 
     const q = query(
       collection(db, this.AVAILABILITIES_TABLE),

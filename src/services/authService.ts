@@ -5,15 +5,17 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 import storageService from "./storageService";
 import type { UserInfos } from "../type/UserInfos";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 /**
  * Service d'authentification Firebase avec Google
  */
 class AuthService {
   private googleProvider = new GoogleAuthProvider();
+  private currentUserRole: string | null = null;
 
   /**
    * Se connecter avec Google
@@ -23,8 +25,10 @@ class AuthService {
   async signInWithGoogle(): Promise<User> {
     try {
       const result = await signInWithPopup(auth, this.googleProvider);
-      if(result.user !== null) {
+      if (result.user !== null) {
         storageService.setCurrentUser(result.user);
+        await this.createUserIfNotExists();
+        await this.loadUserRole();
       }
       return result.user;
     } catch (error) {
@@ -66,9 +70,41 @@ class AuthService {
   getCurrentUserInfos(): UserInfos {
     const userInfos: UserInfos = {
       userId: auth.currentUser?.uid,
-      userName: auth.currentUser?.displayName
+      userName: auth.currentUser?.displayName,
+    };
+    return userInfos;
+  }
+
+  async createUserIfNotExists() {
+    const user = auth.currentUser;
+
+    if (!user) throw new Error("Aucun utilisateur connecté");
+
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        uid: user.uid,
+        name: user.displayName ?? "",
+        email: user.email ?? "",
+        role: "user",
+      });
     }
-    return userInfos
+  }
+
+async loadUserRole(): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) return;
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (snap.exists()) {
+    this.currentUserRole = snap.data().role;
+  }
+}
+
+
+  isCurrentUserAdmin(): boolean {
+    return this.currentUserRole === "admin";
   }
 }
 
