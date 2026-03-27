@@ -1,6 +1,7 @@
 import type { EventInput } from "@fullcalendar/core/index.js";
 import Modal from "react-modal";
 import "./EventModal.css";
+import type { UserInfos } from "../../type/UserInfos";
 
 type Props = {
   isOpen: boolean;
@@ -48,9 +49,9 @@ export default function EventModal({
         <h4 className="event-modal__section-title">Disponibles</h4>
         <ul className="event-modal__list">
           {event.availableUsers.length ? (
-            event.availableUsers.map((u: string) => (
-              <li key={u} className="event-modal__item event-modal__item--available">
-                {u}
+            event.availableUsers.map((u: UserInfos) => (
+              <li key={u.userId} className="event-modal__item event-modal__item--available">
+                {u.userName}
               </li>
             ))
           ) : (
@@ -63,9 +64,9 @@ export default function EventModal({
         <h4 className="event-modal__section-title">Indisponibles</h4>
         <ul className="event-modal__list">
           {event.unavailableUsers.length ? (
-            event.unavailableUsers.map((u: string) => (
-              <li key={u} className="event-modal__item event-modal__item--unavailable">
-                {u}
+            event.unavailableUsers.map((u: UserInfos) => (
+              <li key={u.userId} className="event-modal__item event-modal__item--unavailable">
+                {u.userName}
               </li>
             ))
           ) : (

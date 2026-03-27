@@ -1,6 +1,7 @@
 import type { EventInput } from "@fullcalendar/core/index.js";
 import type { AggregatedSlot } from "../type/AggregatedSlot";
 import type { GlobalAvailabilityEvent } from "../type/GlobalAvailabilityEvent";
+import type { UserInfos } from "../type/UserInfos";
 
 function addMinutes(date: Date, minutes: number): Date {
   return new Date(date.getTime() + minutes * 60 * 1000);
@@ -12,9 +13,21 @@ export function buildAggregatedSlots(
 ): AggregatedSlot[] {
   if (availabilities.length === 0) return [];
 
-  const users = Array.from(
-    new Map(availabilities.map((a) => [a.userId, a.userName])).entries()
-  ).map(([userId, userName]) => ({ userId, userName }));
+  console.log("availabilities", availabilities);
+  
+  const users: UserInfos[] = Array.from(
+  new Map(
+    availabilities
+      .filter((a) => a.userId && a.userName)
+      .map((a) => [
+        a.userId!,
+        {
+          userId: a.userId!,
+          userName: a.userName!,
+        },
+      ])
+  ).values()
+);
 
   const minStart = new Date(
     Math.min(...availabilities.map((a) => a.start.getTime()))
@@ -42,11 +55,10 @@ export function buildAggregatedSlots(
             a.end >= slotEnd
         )
       )
-      .map((user) => user.userName);
 
-    const unavailableUsers = users
-      .filter((user) => !availableUsers.includes(user.userName))
-      .map((user) => user.userName);
+    const unavailableUsers = users.filter(
+      (user) => !availableUsers.some((availableUser) => availableUser.userId === user.userId)
+    );
 
     slots.push({
       start: slotStart,

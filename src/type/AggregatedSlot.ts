@@ -1,8 +1,10 @@
+import type { UserInfos } from "./UserInfos";
+
 export type AggregatedSlot = {
   start: Date;
   end: Date;
-  availableUsers: (string | null | undefined)[];
-  unavailableUsers: (string | null | undefined)[];
+  availableUsers: (UserInfos | undefined)[];
+  unavailableUsers: (UserInfos| undefined)[];
   availableCount: number;
   totalUsers: number;
 };
