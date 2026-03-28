@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import FullCalendar from "@fullcalendar/react";
 import frLocale from "@fullcalendar/core/locales/fr";
 import { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import { useNavigate } from "react-router-dom";
 import "./CalendarGlobalPage.css"
 import EventModal from "../../modals/EventModal/EventModal";
+import CreateEventModal from "../../modals/CreateEventModal/CreateEventModal";
 
 export default function CalendarGlobalPage() {
   const MIN_TIME = "12:00:00";
@@ -27,8 +29,10 @@ export default function CalendarGlobalPage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [selectedEvent, setSelectedEvent] = useState<EventInput>();
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenCreate, setisOpenCreate] = useState(false);
 
   const handleEventClick = (info: EventInput) => {
+    getPlayersFromEvent(info)
     setSelectedEvent({
       title: info.event.title,
       availableUsers: info.event.extendedProps.availableUsers ?? [],
@@ -39,6 +43,11 @@ export default function CalendarGlobalPage() {
     setIsOpen(true);
   };
 
+  const getPlayersFromEvent = (event: EventInput | undefined) => {
+    if(event)
+    console.log(event.event);
+  }
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -47,6 +56,20 @@ export default function CalendarGlobalPage() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    const hasOpenModal = isOpen || isOpenCreate;
+
+    if (hasOpenModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen, isOpenCreate]);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -90,6 +113,10 @@ export default function CalendarGlobalPage() {
         >
           Retour
         </Button>
+        <Button 
+        variant="contained"
+        color="success"
+        onClick={() => setisOpenCreate(true)}>Créer l'evenement</Button>
       </div>
 
       <div className="calendar-global-card">
@@ -137,6 +164,13 @@ export default function CalendarGlobalPage() {
       onClose={() => setIsOpen(false)}
       event={selectedEvent}
       isMobile={isMobile}/>
+
+    <CreateEventModal
+      isOpen={isOpenCreate}
+      onClose={() => setisOpenCreate(false)}
+      isMobile={false}
+      onCreate={(data) => {console.log("event creé", data)}}
+      />
     </>
   );
 }

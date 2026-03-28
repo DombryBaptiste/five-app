@@ -6,6 +6,7 @@ import {
   doc,
   getDocs,
   query,
+  Timestamp,
   where,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
@@ -17,6 +18,7 @@ import {
 } from "../type/AvailabilityEvent";
 import type { GlobalAvailabilityEvent } from "../type/GlobalAvailabilityEvent";
 import { GetStartDateForFilter } from "../utils/CalendarGlobalUtils";
+import type { UserInfos } from "../type/UserInfos";
 
 class CalendarService {
   private readonly AVAILABILITIES_TABLE = "availabilities";
@@ -51,10 +53,7 @@ class CalendarService {
         where("userId", "==", userInfos.userId),
       );
     } else {
-      q = query(
-        collection(db, this.AVAILABILITIES_TABLE),
-        
-      );
+      q = query(collection(db, this.AVAILABILITIES_TABLE));
     }
 
     const querySnapshot = await getDocs(q);
@@ -72,7 +71,7 @@ class CalendarService {
 
     const q = query(
       collection(db, this.AVAILABILITIES_TABLE),
-      where("start", ">=", startOfWeek)
+      where("start", ">=", startOfWeek),
     );
     const querySnapshot = await getDocs(q);
 
@@ -87,6 +86,40 @@ class CalendarService {
         end: data.end.toDate(),
       };
     });
+  }
+
+  async getUserDispo(
+    date: string,
+    startHour: string,
+    endHour: string,
+  ): Promise<UserInfos[]> {
+    const requestedStart = Timestamp.fromDate(
+      new Date(`${date}T${startHour}:00`),
+    );
+    const requestedEnd = Timestamp.fromDate(new Date(`${date}T${endHour}:00`));
+
+    const q = query(
+      collection(db, this.AVAILABILITIES_TABLE),
+      where("start", "<=", requestedStart),
+      where("end", ">=", requestedEnd),
+    );
+
+    const snapshot = await getDocs(q);
+
+    const usersMap = new Map<string, UserInfos>();
+
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data();
+
+      if (!usersMap.has(data.userId)) {
+        usersMap.set(data.userId, {
+          userId: data.userId,
+          userName: data.userName,
+        });
+      }
+    });
+
+    return Array.from(usersMap.values());
   }
 }
 
