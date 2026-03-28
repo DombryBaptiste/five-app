@@ -12,8 +12,6 @@ export function buildAggregatedSlots(
   slotMinutes = 30
 ): AggregatedSlot[] {
   if (availabilities.length === 0) return [];
-
-  console.log("availabilities", availabilities);
   
   const users: UserInfos[] = Array.from(
   new Map(
@@ -136,4 +134,35 @@ export function GetStartDateForFilter(): Date
   startOfWeek.setHours(0, 0, 0, 0);
 
   return startOfWeek;
+}
+
+export type FormattedCalendarData = {
+  calendarEvents: EventInput[];
+  bestSlots: string[];
+};
+
+export function formatGlobalDispos(
+  events: GlobalAvailabilityEvent[],
+  slotDurationMinutes = 60,
+): FormattedCalendarData {
+  const aggregatedSlots = buildAggregatedSlots(events, slotDurationMinutes);
+  const calendarEvents = aggregatedSlotsToEvents(aggregatedSlots);
+
+  const bestSlots =
+    aggregatedSlots.length > 0
+      ? (() => {
+          const maxAvailableCount = Math.max(
+            ...aggregatedSlots.map((slot) => slot.availableCount),
+          );
+
+          return aggregatedSlots
+            .filter((slot) => slot.availableCount === maxAvailableCount)
+            .map(formatBestSlot);
+        })()
+      : ["Aucun créneau trouvé"];
+
+  return {
+    calendarEvents,
+    bestSlots,
+  };
 }

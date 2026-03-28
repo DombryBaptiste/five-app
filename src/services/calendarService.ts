@@ -17,11 +17,12 @@ import {
   type AvailabilityEvent,
 } from "../type/AvailabilityEvent";
 import type { GlobalAvailabilityEvent } from "../type/GlobalAvailabilityEvent";
-import { GetStartDateForFilter } from "../utils/CalendarGlobalUtils";
 import type { UserInfos } from "../type/UserInfos";
+import type { CreateEventPayload } from "../type/CreateEventPaylod";
 
 class CalendarService {
   private readonly AVAILABILITIES_TABLE = "availabilities";
+  private readonly EVENT_TABLE = "events";
 
   async addDispo(event: EventInput): Promise<string> {
     const userInfos = authService.getCurrentUserInfos();
@@ -66,13 +67,19 @@ class CalendarService {
     });
   }
 
-  async getGlobalDispos(): Promise<GlobalAvailabilityEvent[]> {
-    const startOfWeek = GetStartDateForFilter();
+  async getGlobalDispos(
+    start: Date,
+    end: Date,
+  ): Promise<GlobalAvailabilityEvent[]> {
+    const startTs = Timestamp.fromDate(start);
+    const endTs = Timestamp.fromDate(end);
 
     const q = query(
       collection(db, this.AVAILABILITIES_TABLE),
-      where("start", ">=", startOfWeek),
+      where("start", "<", endTs),
+      where("end", ">", startTs),
     );
+
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.docs.map((doc) => {
@@ -120,6 +127,43 @@ class CalendarService {
     });
 
     return Array.from(usersMap.values());
+  }
+
+  async createEvent(event: CreateEventPayload) {
+    const docRef = await addDoc(collection(db, this.EVENT_TABLE), {
+      date: event.date,
+      startDate: Timestamp.fromDate(new Date(event.startDate)),
+      endDate: Timestamp.fromDate(new Date(event.endDate)),
+      playerIds: event.playerIds,
+    });
+
+    return docRef.id;
+  }
+
+  async getEventCreated(start: Date, end: Date): Promise<EventInput[]> {
+    const startTs = Timestamp.fromDate(start);
+    const endTs = Timestamp.fromDate(end);
+
+    const q = query(
+      collection(db, this.EVENT_TABLE),
+      where("startDate", "<", endTs),
+      where("endDate", ">", startTs),
+    );
+
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+
+      return {
+        id: doc.id,
+        title: "FIVE",
+        backgroundColor: "#c21f1f",
+        borderColor: "#c21f1f",
+        start: data.startDate.toDate(),
+        end: data.endDate.toDate(),
+      } as EventInput;
+    });
   }
 }
 

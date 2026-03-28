@@ -3,13 +3,9 @@ import Modal from "react-modal";
 import "./CreateEventModal.css";
 import type { UserInfos } from "../../type/UserInfos";
 import calendarService from "../../services/calendarService";
+import type { CreateEventPayload } from "../../type/CreateEventPaylod";
 
-type CreateEventPayload = {
-  date: string;
-  startDate: string;
-  endDate: string;
-  playerIds: string[];
-};
+
 
 type Props = {
   isOpen: boolean;
@@ -60,7 +56,6 @@ export default function CreateEventModal({
     const nextHour = (hourNumber + 1) % 24;
 
     setEndHour(`${nextHour.toString().padStart(2, "0")}:00`);
-    console.log(value)
   };
 
   useEffect(() => {
@@ -69,7 +64,6 @@ export default function CreateEventModal({
     const fetchUsers = async () => {
       try {
         const users = await calendarService.getUserDispo(date, startHour, endHour);
-        console.log(users)
         setDispoPlayers(users);
       } catch (error) {
         console.error("Erreur lors du chargement des joueurs disponibles :", error);
