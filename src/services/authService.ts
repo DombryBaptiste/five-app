@@ -68,9 +68,10 @@ class AuthService {
   }
 
   getCurrentUserInfos(): UserInfos {
+    if(auth.currentUser == null) throw Error("L'utilisateur actuel n'existe pas");
     const userInfos: UserInfos = {
-      userId: auth.currentUser?.uid,
-      userName: auth.currentUser?.displayName,
+      userId: auth.currentUser.uid,
+      userName: auth.currentUser.displayName != null ? auth.currentUser.displayName : "",
     };
     return userInfos;
   }

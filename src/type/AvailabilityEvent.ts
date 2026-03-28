@@ -4,14 +4,14 @@ import { Timestamp } from "firebase/firestore";
 export type AvailabilityEvent = {
   start: Timestamp;
   end: Timestamp;
-  userId: string | undefined;
-  userName: string | null | undefined;
+  userId: string;
+  userName: string;
 };
 
 export function eventInputToAvailabilityEvent(
   event: EventInput,
-  userId: string | undefined,
-  userName: string | null | undefined,
+  userId: string,
+  userName: string,
 ): AvailabilityEvent {
   return {
     start: Timestamp.fromDate(event.start as Date),
