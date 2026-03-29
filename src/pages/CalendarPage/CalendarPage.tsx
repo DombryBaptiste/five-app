@@ -1,8 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import type {
   DateSelectArg,
   EventInput,
@@ -10,7 +6,6 @@ import type {
 } from "@fullcalendar/core";
 import "./CalendarPage.css";
 import { useNavigate } from "react-router-dom";
-import frLocale from "@fullcalendar/core/locales/fr";
 import Button from "@mui/material/Button"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import calendarService from "../../services/calendarService";
