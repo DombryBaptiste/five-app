@@ -14,12 +14,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      await authService.createUserIfNotExists();
-      await authService.loadUserRole();
-      setLoading(false);
-    });
+      const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+        setUser(firebaseUser);
+        if (firebaseUser) {
+          await authService.createUserIfNotExists();
+          await authService.loadUserRole();
+        }
+        setLoading(false);
+      });
 
     return () => unsub();
   }, []);
