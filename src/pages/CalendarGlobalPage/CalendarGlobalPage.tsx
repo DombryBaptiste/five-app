@@ -1,11 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import FullCalendar from "@fullcalendar/react";
-import frLocale from "@fullcalendar/core/locales/fr";
 import { useCallback, useEffect, useState } from "react";
 import type { EventInput } from "@fullcalendar/core/index.js";
 import calendarService from "../../services/calendarService";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import { formatGlobalDispos } from "../../utils/CalendarGlobalUtils";
 import Button from "@mui/material/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -15,10 +10,9 @@ import EventModal from "../../modals/EventModal/EventModal";
 import CreateEventModal from "../../modals/CreateEventModal/CreateEventModal";
 import type { CreateEventPayload } from "../../type/CreateEventPaylod";
 import authService from "../../services/authService";
+import Calendar from "../../components/Calendar/Calendar";
 
 export default function CalendarGlobalPage() {
-  const MIN_TIME = "12:00:00";
-  const MAX_TIME = "24:00:00";
 
   const navigate = useNavigate();
 
@@ -111,6 +105,10 @@ export default function CalendarGlobalPage() {
     };
   }, [isOpen, isOpenCreate]);
 
+  const getEvents = () => {
+    return [...events, ...createdEvent]
+  }
+
   return (
     <>
       <div className="calendar-global-page">
@@ -142,19 +140,7 @@ export default function CalendarGlobalPage() {
           </p>
 
           <div className="calendar-wrapper">
-            <FullCalendar
-              plugins={[timeGridPlugin, interactionPlugin]}
-              initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
-              locale={frLocale}
-              events={[...events, ...createdEvent]}
-              datesSet={handleDatesSet}
-              slotMinTime={MIN_TIME}
-              slotMaxTime={MAX_TIME}
-              scrollTime="12:00:00"
-              height="auto"
-              allDaySlot={false}
-              eventClick={handleEventClick}
-            />
+              <Calendar events={getEvents()} onEventClick={handleEventClick} onDatesSet={handleDatesSet}  />
           </div>
 
           <div className="best-slots-section">
