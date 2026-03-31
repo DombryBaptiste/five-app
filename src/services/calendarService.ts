@@ -22,7 +22,6 @@ import type { Dayjs } from "dayjs";
 
 class CalendarService {
   private readonly AVAILABILITIES_TABLE = "availabilities";
-  private readonly EVENT_TABLE = "events";
 
   async addDispo(event: EventInput): Promise<string> {
     const userInfos = authService.getCurrentUserInfos();
