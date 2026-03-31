@@ -94,6 +94,7 @@ export function aggregatedSlotsToEvents(slots: AggregatedSlot[]): EventInput[] {
     backgroundColor: getGreenColor(slot.availableCount, slot.totalUsers),
     borderColor: getGreenColor(slot.availableCount, slot.totalUsers),
     extendedProps: {
+      type: "availability",
       availableUsers: slot.availableUsers,
       unavailableUsers: slot.unavailableUsers,
       availableCount: slot.availableCount,

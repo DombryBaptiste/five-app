@@ -55,6 +55,15 @@ class EventService {
         borderColor: "#c21f1f",
         start: data.startHour.toDate(),
         end: data.endHour.toDate(),
+        extendedProps: {
+          type: "created",
+          place: data.place,
+          isBooked: data.isBooked,
+          playerIds: data.playerIds,
+          startHour: data.startHour.toDate(),
+          endHour: data.endHour.toDate(),
+          date: data.date,
+        },
       } as EventInput;
     });
   }

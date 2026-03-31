@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { EventInput } from "@fullcalendar/core/index.js";
+import type { EventClickArg, EventInput } from "@fullcalendar/core/index.js";
 import calendarService from "../../services/calendarService";
 import { formatGlobalDispos } from "../../utils/CalendarGlobalUtils";
 import Button from "@mui/material/Button";
@@ -14,30 +14,54 @@ import Calendar from "../../components/Calendar/Calendar";
 import eventService from "../../services/eventService";
 
 export default function CalendarGlobalPage() {
-
   const navigate = useNavigate();
 
   const [events, setEvents] = useState<EventInput[]>([]);
   const [bestSlots, setBestSlots] = useState<string[]>([]);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [selectedEvent, setSelectedEvent] = useState<EventInput>();
+  const [selectedAvailabilityEvent, setSelectedAvailabilityEvent] = useState<EventInput>();
+  const [selectedCreatedEvent, setSelectedCreatedEvent] = useState<EventInput>();
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenCreate, setisOpenCreate] = useState(false);
+  const [isOpenCreate, setisOpenCreate] = useState<boolean>(false);
+  const [modalMode, setModalMode] = useState<"create" | "update" | null>(null);
   const [createdEvent, setCreatedEvent] = useState<EventInput[]>([]);
   const [currentRange, setCurrentRange] = useState<{
     start: Date;
     end: Date;
   } | null>(null);
 
-  const handleEventClick = (info: EventInput) => {
-    setSelectedEvent({
+  const handleEventClick = (info: EventClickArg) => {
+    const type = info.event.extendedProps.type;
+    if (type === "created") {
+      openEventCreated(info);
+    } else {
+      openEvent(info);
+    }
+  };
+
+  const openEvent = (info: EventInput) => {
+    setSelectedAvailabilityEvent({
       title: info.event.title,
       availableUsers: info.event.extendedProps.availableUsers ?? [],
       unavailableUsers: info.event.extendedProps.unavailableUsers ?? [],
       availableCount: info.event.extendedProps.availableCount ?? 0,
       totalUsers: info.event.extendedProps.totalUsers ?? 0,
     });
+
     setIsOpen(true);
+  };
+
+  const openEventCreated = (info: EventClickArg) => {
+    setSelectedCreatedEvent({
+      title: info.event.title,
+      place: info.event.extendedProps.place ?? "",
+      date: info.event.extendedProps.date ?? new Date(),
+      startHour: info.event.extendedProps.startHour ?? new Date(),
+      endHour: info.event.extendedProps.endHour ?? new Date(),
+      isBooked: info.event.extendedProps.isBooked ?? false,
+      playerIds: info.event.extendedProps.playerIds ?? [],
+    });
+
+    handleOpenCreateUpdateModal("update");
   };
 
   const loadEvent = useCallback(async (range: { start: Date; end: Date }) => {
@@ -73,6 +97,16 @@ export default function CalendarGlobalPage() {
     });
   };
 
+  const handleOpenCreateUpdateModal = (mode: "create" | "update") => {
+    setModalMode(mode);
+    setisOpenCreate(true);
+  };
+
+  const handleCloseCreateUpdateModal = () => {
+    setModalMode(null);
+    setisOpenCreate(false);
+  }
+
   useEffect(() => {
     if (!currentRange) return;
 
@@ -82,15 +116,6 @@ export default function CalendarGlobalPage() {
 
     fetchData();
   }, [currentRange, loadEvent]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   useEffect(() => {
     const hasOpenModal = isOpen || isOpenCreate;
@@ -107,8 +132,8 @@ export default function CalendarGlobalPage() {
   }, [isOpen, isOpenCreate]);
 
   const getEvents = () => {
-    return [...events, ...createdEvent]
-  }
+    return [...events, ...createdEvent];
+  };
 
   return (
     <>
@@ -126,7 +151,7 @@ export default function CalendarGlobalPage() {
             <Button
               variant="contained"
               color="success"
-              onClick={() => setisOpenCreate(true)}
+              onClick={() => handleOpenCreateUpdateModal("create")}
             >
               Créer l'evenement
             </Button>
@@ -141,7 +166,11 @@ export default function CalendarGlobalPage() {
           </p>
 
           <div className="calendar-wrapper">
-              <Calendar events={getEvents()} onEventClick={handleEventClick} onDatesSet={handleDatesSet}  />
+            <Calendar
+              events={getEvents()}
+              onEventClick={handleEventClick}
+              onDatesSet={handleDatesSet}
+            />
           </div>
 
           <div className="best-slots-section">
@@ -165,15 +194,16 @@ export default function CalendarGlobalPage() {
       <EventModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        event={selectedEvent}
-        isMobile={isMobile}
+        event={selectedAvailabilityEvent}
       />
 
       <CreateEventModal
         isOpen={isOpenCreate}
-        onClose={() => setisOpenCreate(false)}
+        onClose={() => handleCloseCreateUpdateModal()}
         isMobile={false}
         onCreate={handleCreateEvent}
+        event={selectedCreatedEvent}
+        create={modalMode === "create"}
       />
     </>
   );

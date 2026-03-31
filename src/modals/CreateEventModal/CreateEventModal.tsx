@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import Modal from "@mui/material/Modal";
 import "./CreateEventModal.css";
 import type { UserInfos } from "../../type/UserInfos";
@@ -16,15 +16,20 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Button from "@mui/material/Button";
+import type { EventInput } from "@fullcalendar/core/index.js";
+import authService from "../../services/authService";
+import dayjs from "dayjs";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   isMobile: boolean;
   onCreate: (data: CreateEventPayload) => void;
+  event: EventInput | undefined
+  create: boolean;
 };
 
-export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
+export default function CreateEventModal({ isOpen, onClose, onCreate, event, create }: Props) {
   const [date, setDate] = useState<Dayjs | null>(null);
   const [startHour, setStartHour] = useState<Dayjs | null>(null);
   const [isBooked, setIsBooked] = useState(false);
@@ -32,12 +37,12 @@ export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
   const [dispoPlayers, setDispoPlayers] = useState<UserInfos[]>([]);
 
-  console.log(dispoPlayers);
-
   const placeList: string[] = ["Le temple du foot", "Le five", "Autre lieu"];
   const endHour = useMemo(() => {
     return startHour ? startHour.add(1, "hour") : null;
   }, [startHour]);
+  const isAdmin = authService.isCurrentUserAdmin();
+  const titleModal = create ? "Créer un événement" : "Information sur l'événement";
 
   const handleCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
@@ -48,8 +53,23 @@ export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
     }
   };
 
+  const fillForm = useEffectEvent((event: EventInput | undefined) => {
+    if (!event) return;
+
+    setDate(event.date ? dayjs(event.date as string | Date) : null);
+    setStartHour(event.startHour ? dayjs(event.startHour) : null);
+    setIsBooked(event.isBooked ?? false);
+    setPlace(event.place ?? "");
+    setSelectedPlayerIds(event.playerIds ?? []);
+  })
+
+  useEffect(() => {
+    if(event) {
+      fillForm(event);
+    }
+  }, [event])
+
   const resetForm = () => {
-    console.log("reset form");
     setDate(null);
     setStartHour(null);
     setDispoPlayers([]);
@@ -123,8 +143,6 @@ export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
       playerIds: selectedPlayerIds,
     };
 
-    console.log(created);
-
     onCreate(created);
 
     resetForm();
@@ -140,18 +158,20 @@ export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
         aria-describedby="modal-modal-description"
       >
         <Box className="box-modal">
-          <h2 className="modal-title">Créer un événement</h2>
+          <h2 className="modal-title">{titleModal}</h2>
           <FormGroup className="form-group">
             <CustomDatePicker
               label="Date de l'événement"
               onChange={setDate}
               value={date}
+              disabled={!isAdmin}
             />
             <div className="hour-pickers">
               <CustomTimePicker
                 label="Heure de début"
                 onChange={setStartHour}
                 value={startHour}
+                disabled={!isAdmin}
               />
               <CustomTimePicker
                 label="Heure de fin"
@@ -161,7 +181,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
             </div>
             <div className="booking-wrapper">
               <FormControlLabel
-                control={<Checkbox checked={isBooked} onChange={handleCheck} />}
+                control={<Checkbox checked={isBooked} onChange={handleCheck} disabled={!isAdmin}/>}
                 label="Réservé ?"
               />
               <FormControl className="place-control">
@@ -171,7 +191,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
                   value={place}
                   label="Lieu de l'événement"
                   onChange={(e) => setPlace(e.target.value)}
-                  disabled={!isBooked}
+                  disabled={!isBooked || !isAdmin}
                 >
                   {placeList.map((placeOption) => (
                     <MenuItem key={placeOption} value={placeOption}>
@@ -200,6 +220,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
                         onChange={handleCheckPlayer}
                         value={player.userId}
                         checked={selectedPlayerIds.includes(player.userId)}
+                        disabled={!isAdmin}
                       />
                     }
                     label={player.userName}
