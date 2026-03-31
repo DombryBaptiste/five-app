@@ -1,6 +1,10 @@
+import { Dayjs } from "dayjs";
+
 export type CreateEventPayload = {
-  date: string;
-  startDate: string;
-  endDate: string;
+  date: Dayjs;
+  startHour: Dayjs;
+  endHour: Dayjs;
+  isBooked: boolean;
+  place: string;
   playerIds: string[];
 };

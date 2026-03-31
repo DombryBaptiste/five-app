@@ -1,11 +1,21 @@
-import { useEffect, useState } from "react";
-import Modal from "react-modal";
+import { useEffect, useMemo, useState } from "react";
+import Modal from "@mui/material/Modal";
 import "./CreateEventModal.css";
 import type { UserInfos } from "../../type/UserInfos";
 import calendarService from "../../services/calendarService";
 import type { CreateEventPayload } from "../../type/CreateEventPaylod";
-
-
+import Checkbox from "@mui/material/Checkbox";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import CustomDatePicker from "../../components/DatePicker/CustomDatePicker";
+import type { Dayjs } from "dayjs";
+import Box from "@mui/material/Box";
+import CustomTimePicker from "../../components/TimePicker/CustomTimePicker";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Button from "@mui/material/Button";
 
 type Props = {
   isOpen: boolean;
@@ -14,29 +24,38 @@ type Props = {
   onCreate: (data: CreateEventPayload) => void;
 };
 
-export default function CreateEventModal({
-  isOpen,
-  onClose,
-  isMobile,
-  onCreate,
-}: Props) {
-  const [date, setDate] = useState("");
-  const [startHour, setStartHour] = useState("");
-  const [endHour, setEndHour] = useState("");
+export default function CreateEventModal({ isOpen, onClose, onCreate }: Props) {
+  const [date, setDate] = useState<Dayjs | null>(null);
+  const [startHour, setStartHour] = useState<Dayjs | null>(null);
+  const [isBooked, setIsBooked] = useState(false);
+  const [place, setPlace] = useState("");
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
   const [dispoPlayers, setDispoPlayers] = useState<UserInfos[]>([]);
 
-  const availableHours = Array.from({ length: 12 }, (_, index) => {
-    const hour = index + 12; // de 12 à 23
-    return `${hour.toString().padStart(2, "0")}:00`;
-  });
+  console.log(dispoPlayers);
+
+  const placeList: string[] = ["Le temple du foot", "Le five", "Autre lieu"];
+  const endHour = useMemo(() => {
+    return startHour ? startHour.add(1, "hour") : null;
+  }, [startHour]);
+
+  const handleCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setIsBooked(checked);
+
+    if (!checked) {
+      setPlace("");
+    }
+  };
 
   const resetForm = () => {
-    setDate("");
-    setStartHour("");
-    setEndHour("");
+    console.log("reset form");
+    setDate(null);
+    setStartHour(null);
     setDispoPlayers([]);
     setSelectedPlayerIds([]);
+    setIsBooked(false);
+    setPlace("");
   };
 
   const handleClose = () => {
@@ -44,29 +63,22 @@ export default function CreateEventModal({
     onClose();
   };
 
-  const handleChangeStartHour = (value: string) => {
-    setStartHour(value);
-
-    if (!value) {
-      setEndHour("");
-      return;
-    }
-
-    const hourNumber = Number(value.split(":")[0]);
-    const nextHour = (hourNumber + 1) % 24;
-
-    setEndHour(`${nextHour.toString().padStart(2, "0")}:00`);
-  };
-
   useEffect(() => {
     if (!isOpen || !startHour || !endHour || !date) return;
 
     const fetchUsers = async () => {
       try {
-        const users = await calendarService.getUserDispo(date, startHour, endHour);
+        const users = await calendarService.getUserDispo(
+          date,
+          startHour,
+          endHour,
+        );
         setDispoPlayers(users);
       } catch (error) {
-        console.error("Erreur lors du chargement des joueurs disponibles :", error);
+        console.error(
+          "Erreur lors du chargement des joueurs disponibles :",
+          error,
+        );
         setDispoPlayers([]);
       }
     };
@@ -74,168 +86,133 @@ export default function CreateEventModal({
     fetchUsers();
   }, [isOpen, startHour, endHour, date]);
 
-  const togglePlayer = (playerId: string) => {
+  const handleCheckPlayer = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const playerId = e.target.value;
+    const checked = e.target.checked;
+
     setSelectedPlayerIds((prev) =>
-      prev.includes(playerId)
-        ? prev.filter((id) => id !== playerId)
-        : [...prev, playerId],
+      checked ? [...prev, playerId] : prev.filter((id) => id !== playerId),
     );
   };
 
-  const buildIsoDateTime = (selectedDate: string, selectedHour: string) => {
-    return `${selectedDate}T${selectedHour}`;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (!date || !startHour || !endHour) {
       return;
     }
 
-    const startDate = buildIsoDateTime(date, startHour);
-    const endDate = buildIsoDateTime(date, endHour);
+    const startDateTime = date
+      .hour(startHour.hour())
+      .minute(startHour.minute())
+      .second(0)
+      .millisecond(0);
 
-    if (startDate >= endDate) {
-      alert("L'heure de fin doit être après l'heure de début.");
-      return;
-    }
+    const endDateTime = date
+      .hour(endHour.hour())
+      .minute(endHour.minute())
+      .second(0)
+      .millisecond(0);
 
-    onCreate({
-      date,
-      startDate,
-      endDate,
+    const created: CreateEventPayload = {
+      date: date.startOf("day"),
+      startHour: startDateTime,
+      endHour: endDateTime,
+      isBooked: isBooked,
+      place: place,
       playerIds: selectedPlayerIds,
-    });
+    };
+
+    console.log(created);
+
+    onCreate(created);
 
     resetForm();
     onClose();
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={handleClose}
-      contentLabel="Créer un événement"
-      className={`create-event-modal ${isMobile ? "create-event-modal--mobile" : "create-event-modal--desktop"}`}
-      overlayClassName="create-event-modal-overlay"
-    >
-      <div className="create-event-modal__header">
-        <h3 className="create-event-modal__title">Créer un event</h3>
-        <button
-          type="button"
-          className="create-event-modal__close"
-          onClick={handleClose}
-          aria-label="Fermer la fenêtre"
-        >
-          ×
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="create-event-modal__form">
-        <div className="create-event-modal__section">
-          <label htmlFor="event-date" className="create-event-modal__label">
-            Date
-          </label>
-          <input
-            id="event-date"
-            type="date"
-            className="create-event-modal__input"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="create-event-modal__row">
-          <div className="create-event-modal__section">
-            <label htmlFor="event-start-hour" className="create-event-modal__label">
-              Heure début
-            </label>
-            <select
-              id="event-start-hour"
-              className="create-event-modal__input"
-              value={startHour}
-              onChange={(e) => handleChangeStartHour(e.target.value)}
-              required
-            >
-              <option value="">Sélectionner une heure</option>
-              {availableHours.map((hour) => (
-                <option key={hour} value={hour}>
-                  {hour}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="create-event-modal__section">
-            <label htmlFor="event-end-hour" className="create-event-modal__label">
-              Heure fin
-            </label>
-            <input
-              id="event-end-hour"
-              type="text"
-              className="create-event-modal__input"
-              value={endHour}
-              readOnly
+    <>
+      <Modal
+        open={isOpen}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box className="box-modal">
+          <h2 className="modal-title">Créer un événement</h2>
+          <FormGroup className="form-group">
+            <CustomDatePicker
+              label="Date de l'événement"
+              onChange={setDate}
+              value={date}
             />
-          </div>
-        </div>
+            <div className="hour-pickers">
+              <CustomTimePicker
+                label="Heure de début"
+                onChange={setStartHour}
+                value={startHour}
+              />
+              <CustomTimePicker
+                label="Heure de fin"
+                value={endHour}
+                disabled={true}
+              />
+            </div>
+            <div className="booking-wrapper">
+              <FormControlLabel
+                control={<Checkbox checked={isBooked} onChange={handleCheck} />}
+                label="Réservé ?"
+              />
+              <FormControl className="place-control">
+                <InputLabel id="place-label">Lieu de l'événement</InputLabel>
+                <Select
+                  labelId="place-label"
+                  value={place}
+                  label="Lieu de l'événement"
+                  onChange={(e) => setPlace(e.target.value)}
+                  disabled={!isBooked}
+                >
+                  {placeList.map((placeOption) => (
+                    <MenuItem key={placeOption} value={placeOption}>
+                      {placeOption}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
 
-        <div className="create-event-modal__section">
-          <div className="create-event-modal__players-header">
-            <label className="create-event-modal__label">
-              Joueurs disponibles
-            </label>
-            <span className="create-event-modal__count">
-              {selectedPlayerIds.length} sélectionné(s)
-            </span>
-          </div>
+            <div className="players-header">
+              <span>Joueurs disponibles</span>
+              <span>{selectedPlayerIds.length} sélectionné(s)</span>
+            </div>
 
-          <div className="create-event-modal__players-list">
-            {dispoPlayers.length > 0 ? (
-              dispoPlayers.map((player) => {
-                const checked = selectedPlayerIds.includes(player.userId);
-
-                return (
-                  <label
+            <div className="players-body">
+              {dispoPlayers.length === 0 ? (
+                <div className="empty">Aucun joueur disponible.</div>
+              ) : (
+                dispoPlayers.map((player) => (
+                  <FormControlLabel
                     key={player.userId}
-                    className={`create-event-modal__player ${checked ? "create-event-modal__player--selected" : ""}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => togglePlayer(player.userId)}
-                      className="create-event-modal__checkbox"
-                    />
-                    <span>{player.userName}</span>
-                  </label>
-                );
-              })
-            ) : (
-              <div className="create-event-modal__empty">
-                Aucun joueur disponible.
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="create-event-modal__footer">
-          <button
-            type="button"
-            className="create-event-modal__button create-event-modal__button--secondary"
-            onClick={handleClose}
-          >
-            Annuler
-          </button>
-          <button
-            type="submit"
-            className="create-event-modal__button create-event-modal__button--primary"
-          >
-            Créer
-          </button>
-        </div>
-      </form>
-    </Modal>
+                    control={
+                      <Checkbox
+                        color="success"
+                        onChange={handleCheckPlayer}
+                        value={player.userId}
+                        checked={selectedPlayerIds.includes(player.userId)}
+                      />
+                    }
+                    label={player.userName}
+                  />
+                ))
+              )}
+            </div>
+            <Button variant="contained" color="success" onClick={handleSubmit}>
+              Créer l'événement
+            </Button>
+          </FormGroup>
+        </Box>
+      </Modal>
+    </>
   );
 }

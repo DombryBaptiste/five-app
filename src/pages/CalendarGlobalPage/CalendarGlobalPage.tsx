@@ -11,6 +11,7 @@ import CreateEventModal from "../../modals/CreateEventModal/CreateEventModal";
 import type { CreateEventPayload } from "../../type/CreateEventPaylod";
 import authService from "../../services/authService";
 import Calendar from "../../components/Calendar/Calendar";
+import eventService from "../../services/eventService";
 
 export default function CalendarGlobalPage() {
 
@@ -47,7 +48,7 @@ export default function CalendarGlobalPage() {
 
     const { calendarEvents, bestSlots } = formatGlobalDispos(globalDispos, 60);
 
-    const eventCreatedFiltered = await calendarService.getEventCreated(
+    const eventCreatedFiltered = await eventService.getEventCreated(
       range.start,
       range.end,
     );
@@ -58,7 +59,7 @@ export default function CalendarGlobalPage() {
   }, []);
 
   const handleCreateEvent = async (createEvent: CreateEventPayload) => {
-    await calendarService.createEvent(createEvent);
+    await eventService.createEvent(createEvent);
 
     if (currentRange) {
       await loadEvent(currentRange);
