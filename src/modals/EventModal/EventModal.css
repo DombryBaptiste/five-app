@@ -177,24 +177,27 @@
     align-items: flex-end;
     padding: 0;
   }
-
+  .event-modal {
+    width: 85% !important;
+    margin: 0 auto;
+    box-shadow: 0px 4px 24px rgba(0,0,0,0.12);
+  }
   .event-modal__title {
     font-size: 1.1rem;
   }
-
   .event-modal__count {
     font-size: 0.94rem;
   }
-
   .event-modal__item {
     font-size: 0.93rem;
   }
-
   .event-modal__footer {
     justify-content: stretch;
+    margin-top: 16px;
   }
-
   .event-modal__button {
     width: 100%;
+    min-height: 44px;
+    font-size: 1rem;
   }
 }
