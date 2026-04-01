@@ -30,6 +30,14 @@ type Props = {
 };
 
 export default function CreateEventModal({ isOpen, onClose, onCreate, event, create }: Props) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
   const [date, setDate] = useState<Dayjs | null>(null);
   const [startHour, setStartHour] = useState<Dayjs | null>(null);
   const [isBooked, setIsBooked] = useState(false);
@@ -157,7 +165,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreate, event, cre
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box className="box-modal">
+        <Box className={`box-modal${isMobile ? " box-modal--mobile" : ""}`}>
           <h2 className="modal-title">{titleModal}</h2>
           <FormGroup className="form-group">
             <CustomDatePicker
