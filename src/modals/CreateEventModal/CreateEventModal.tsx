@@ -25,11 +25,13 @@ type Props = {
   onClose: () => void;
   isMobile: boolean;
   onCreate: (data: CreateEventPayload) => void;
+  onUpdate: (id: string, data: CreateEventPayload) => void;
+  onDelete: (id: string) => void;
   event: EventInput | undefined
   create: boolean;
 };
 
-export default function CreateEventModal({ isOpen, onClose, onCreate, event, create }: Props) {
+export default function CreateEventModal({ isOpen, onClose, onCreate, onUpdate, onDelete, event, create }: Props) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreate, event, cre
   }, [startHour]);
   const isAdmin = authService.isCurrentUserAdmin();
   const titleModal = create ? "Créer un événement" : "Information sur l'événement";
+  const titleButton = create ? "Créer l'événement" : "Modifier l'événement";
 
   const handleCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
@@ -88,6 +91,13 @@ export default function CreateEventModal({ isOpen, onClose, onCreate, event, cre
 
   const handleClose = () => {
     resetForm();
+    onClose();
+  };
+
+  const handleDelete = () => {
+    if (event?.eventId) {
+      onDelete(event.eventId);
+    }
     onClose();
   };
 
@@ -151,7 +161,13 @@ export default function CreateEventModal({ isOpen, onClose, onCreate, event, cre
       playerIds: selectedPlayerIds,
     };
 
-    onCreate(created);
+    if(create) {
+      onCreate(created);
+    } else {
+      console.log(event?.eventId);
+      if(event?.eventId) onUpdate(event.eventId, created);
+    }
+    
 
     resetForm();
     onClose();
@@ -236,9 +252,14 @@ export default function CreateEventModal({ isOpen, onClose, onCreate, event, cre
                 ))
               )}
             </div>
-            <Button variant="contained" color="success" onClick={handleSubmit}>
-              Créer l'événement
+            <Button variant="contained" color="success" onClick={handleSubmit} disabled={!isAdmin}>
+              {titleButton}
             </Button>
+            {!create && (
+              <Button variant="outlined" color="error" onClick={handleDelete} disabled={!isAdmin}>
+                Supprimer l'événement
+              </Button>
+            )}
           </FormGroup>
         </Box>
       </Modal>

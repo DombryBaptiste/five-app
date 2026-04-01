@@ -52,6 +52,7 @@ export default function CalendarGlobalPage() {
 
   const openEventCreated = (info: EventClickArg) => {
     setSelectedCreatedEvent({
+      eventId: info.event.id,
       title: info.event.title,
       place: info.event.extendedProps.place ?? "",
       date: info.event.extendedProps.date ?? new Date(),
@@ -60,6 +61,9 @@ export default function CalendarGlobalPage() {
       isBooked: info.event.extendedProps.isBooked ?? false,
       playerIds: info.event.extendedProps.playerIds ?? [],
     });
+    console.log(info.event);
+    console.log(info.event.id);
+    console.log(selectedCreatedEvent);
 
     handleOpenCreateUpdateModal("update");
   };
@@ -89,6 +93,22 @@ export default function CalendarGlobalPage() {
       await loadEvent(currentRange);
     }
   };
+
+  const handleUpdateEvent = async (id: string, updateEvent: CreateEventPayload) => {
+    await eventService.updateEvent(id, updateEvent);
+
+    if (currentRange) {
+      await loadEvent(currentRange);
+    }
+  }
+
+  const handleDeleteEvent = async (id: string) => {
+    await eventService.deleteEvent(id);
+
+    if (currentRange) {
+      await loadEvent(currentRange);
+    }
+  }
 
   const handleDatesSet = (dateInfo: { start: Date; end: Date }) => {
     setCurrentRange({
@@ -202,6 +222,8 @@ export default function CalendarGlobalPage() {
         onClose={() => handleCloseCreateUpdateModal()}
         isMobile={false}
         onCreate={handleCreateEvent}
+        onUpdate={handleUpdateEvent}
+        onDelete={handleDeleteEvent}
         event={selectedCreatedEvent}
         create={modalMode === "create"}
       />
